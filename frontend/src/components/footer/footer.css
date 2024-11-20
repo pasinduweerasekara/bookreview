@@ -1,0 +1,13 @@
+#footer-container{
+    width: 100%;
+    min-height: 50vh;
+    background-color: #232323;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#footer-dummy-content{
+    color: #fff;
+    font-size: 72px;
+    font-weight: 200;
+}
