@@ -19,11 +19,7 @@ const registerUser = async (req, res) => {
             email,
             password,
         });
-
-        // Hash the password
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
-
+        
         // Save the user to the database
         const newUser = await user.save();
 
@@ -47,16 +43,22 @@ const registerUser = async (req, res) => {
 // Authenticate (Login) a user
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
+    console.log({ email, password });
+    
 
     try {
         // Check if the user exists
         const user = await User.findOne({ email });
+        console.log(user);
+        
         if (!user) {
             return res.status(400).json({ message: "User not found" });
         }
 
         // Compare the password with the hashed password in the database
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await user.matchPassword(password);
+        console.log(isMatch);
+        
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
         }

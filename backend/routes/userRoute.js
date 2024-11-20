@@ -9,6 +9,7 @@ router.post("/register", registerUser);
 // POST /users/login: Login an existing user
 router.post("/login", loginUser);
 
+
 // GET /users/profile: Get the current user's profile (protected route)
 router.get("/profile", protect, getUserProfile);
 
