@@ -1,8 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const mongoose = require("mongoose");
-const asyncHandler = require("express-async-handler");
 const {connectDB} = require('./config/db')
 
 // Initialize environment variables
@@ -13,8 +11,24 @@ const app = express();
 
 // Middleware
 app.use(express.json()); // Parse JSON request bodies
-app.use(cors());
-
+// CORS options
+const allowedOrigins = [
+    "http://localhost:5173",  // Frontend in development
+  ];
+  
+  const corsOptions = {
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    optionsSuccessStatus: 200, // For legacy browsers
+  };
+  
+  app.use(cors(corsOptions));
 // Connect to MongoDB
 connectDB()
 
@@ -25,14 +39,6 @@ app.get("/", (req, res) => {
 app.use("/reviews", require('./routes/reviewRoute'))
 app.use("/books", require('./routes/bookRoute'))
 app.use("/users", require('./routes/userRoute'))
-
-// Example Protected Route
-app.get(
-    "/protected",
-    asyncHandler(async (req, res) => {
-        res.send("This is a protected route.");
-    })
-);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

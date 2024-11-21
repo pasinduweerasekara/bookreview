@@ -76,19 +76,12 @@ const updateReview = async (req, res) => {
 
 // Delete a review by ID
 const deleteReview = async (req, res) => {
+    const {bookId} = req.query 
     try {
         const review = await Review.findByIdAndDelete(req.params.id);
         if (!review) {
             return res.status(404).json({ message: "Review not found" });
         }
-
-        // Recalculate average rating for the book after deleting a review
-        const book = await Book.findById(review.bookId);
-        const reviews = await Review.find({ bookId: book._id });
-        const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
-        book.averageRating = averageRating;
-        await book.save();
-
         res.json({ message: "Review deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message });

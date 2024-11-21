@@ -1,4 +1,5 @@
 const Book = require("../models/bookModel");
+const Review = require("../models/reviewModel")
 
 // Get all books
 const getBooks = async (req, res) => {
@@ -13,15 +14,24 @@ const getBooks = async (req, res) => {
 // Get a specific book by ID
 const getBookById = async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
-        if (!book) {
-            return res.status(404).json({ message: "Book not found" });
-        }
-        res.json(book);
+      // Find the book by ID
+      const book = await Book.findById(req.params.id)
+
+      if (!book) {
+        return res.status(404).json({ message: "Book not found" })
+      }
+      
+      // Fetch the reviews related to the book
+      const reviews = await Review.find({ bookId: book._id })
+      res.json({
+        book,
+        reviews,
+      });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-};
+  };
+  
 
 // Create a new book
 const createBook = async (req, res) => {

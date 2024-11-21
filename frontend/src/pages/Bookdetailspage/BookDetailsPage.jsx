@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { AiFillStar } from "react-icons/ai";
 import axios from "axios";
 import "./bookdetailspage.css";
 import LoginSignup from "../../components/loginsignup/LoginSignup";
 import { useUserContext } from "../../context/userContext";
+import Spinner from '../../components/spinner/Spinner'
 
 const BookDetailsPage = () => {
   const { id } = useParams(); // Get the book id from the URL
@@ -16,64 +17,26 @@ const BookDetailsPage = () => {
   const [rating, setRating] = useState(5);
 
   const {currentUser} = useUserContext()
-  
-  useEffect(() => {
-
-  if (currentUser) {
-    setCurrentUser(currentUser)
-  }else setCurrentUser(null)
-  }, [user])
-  
-  
-  useEffect(()=>{
-    setCurrentUser({id: "u1",
-    name: "John Doe", 
-    email: "johndoe@example.com", })
-    setCurrentUser(null)
-
-    setReviews([
-        {
-          id: "r1", // Unique identifier for the review
-          text: "A timeless masterpiece that offers insight into the American experience. The prose is beautiful and the story is poignant.",
-          rating: 5, // Review rating (e.g., 5 out of 5)
-          userName: "John Doe", // The name of the reviewer
-          userId: "u1", // The ID of the reviewer (user)
-        },
-        {
-          id: "r2",
-          text: "A bit overrated for me. The story is slow in parts, but the writing is undeniably brilliant. Still a must-read.",
-          rating: 4,
-          userName: "Jane Smith",
-          userId: "u2",
-        },
-        {
-          id: "r3",
-          text: "Not my cup of tea. I struggled to connect with the characters, and the plot felt shallow.",
-          rating: 2,
-          userName: "Alice Johnson",
-          userId: "u3",
-        },
-      ])
-  },[])
 
   useEffect(() => {
     const fetchBookData = async () => {
       try {
         // Fetch book details and reviews from the database
-        const bookResponse = await axios.get(`http://localhost:5000/books/${id}`);
-        setBook(bookResponse.data);
-        
-
-        // Fetch current user (simulated by fetching from a session/token)
-        const userResponse = await axios.get("/api/auth/current-user");
-        setCurrentUser(userResponse.data.user);
+        const bookResponse = await axios.get(`${import.meta.env.VITE_BASE_URL}/books/${id}`);
+        setBook(bookResponse.data.book);
+        setReviews(bookResponse.data.reviews);
       } catch (error) {
         console.error("Error fetching book data:", error);
       }
     };
-
+  
     fetchBookData();
   }, [id]);
+
+
+  const memoizedLoginSignup = useMemo(() => {
+    return showLogin ? <LoginSignup setShowLogin={setShowLogin} setUser={setCurrentUser} /> : null;
+  }, [showLogin, setCurrentUser]);
 
   const handleLoginBtnClick = ()=>{
     setShowLogin(!showLogin)
@@ -86,13 +49,15 @@ const BookDetailsPage = () => {
 
     try {
       const newReview = {
-        text: reviewText,
+        reviewText,
         rating,
-        userId: currentUser.id,
+        userId: currentUser._id,
+        bookId:id
       };
 
-      const response = await axios.post(`/api/books/${id}/reviews`, newReview);
-      setReviews([response.data.review, ...reviews]); // Add the new review to the top
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/reviews/`, newReview)
+      
+      setReviews([response.data, ...reviews]); // Add the new review to the top
       setReviewText("");
       setRating(5);
     } catch (error) {
@@ -130,18 +95,18 @@ const BookDetailsPage = () => {
     if (!window.confirm("Are you sure you want to delete this review?")) return;
 
     try {
-      await axios.delete(`/api/reviews/${reviewId}`);
-      setReviews(reviews.filter((review) => review.id !== reviewId));
+      setReviews(reviews.filter((review) => review._id !== reviewId));
+      await axios.delete(`${import.meta.env.VITE_BASE_URL}/reviews/${reviewId}?boodId=${id}`);
     } catch (error) {
       console.error("Error deleting review:", error);
     }
   };
 
-  if (!book) return <div>Loading...</div>;
+  if (!book) return <Spinner/>;
 
   // Separate current user's reviews from others
-  const currentUserReviews = reviews.filter((review) => review.userId === currentUser?.id);
-  const otherReviews = reviews.filter((review) => review.userId !== currentUser?.id);
+  const currentUserReviews = reviews.filter((review) => review.userId === currentUser?._id);
+  const otherReviews = reviews.filter((review) => review.userId !== currentUser?._id);
 
   const handleLightboxClick =() =>{
     setShowLogin(false)
@@ -171,17 +136,17 @@ const BookDetailsPage = () => {
           <div>
             <h4>By You</h4>
             {currentUserReviews.map((review) => (
-              <div key={review.id} className="review-card">
+              <div key={review._id} className="review-card">
                 <div className="review-rating">
                   <AiFillStar className="star-icon" />
                   {review.rating}
                 </div>
-                <p className="review-text">{review.text}</p>
+                <p className="review-text">{review.reviewText}</p>
                 <div className="review-actions">
-                  <button className="edit-btn" onClick={() => handleEditReview(review.id)}>
+                  <button className="edit-btn" onClick={() => handleEditReview(review._id)}>
                     Edit
                   </button>
-                  <button className="delete-btn" onClick={() => handleDeleteReview(review.id)}>
+                  <button className="delete-btn" onClick={() => handleDeleteReview(review._id)}>
                     Delete
                   </button>
                 </div>
@@ -194,17 +159,17 @@ const BookDetailsPage = () => {
         <h4>By Others</h4>
         {otherReviews.length > 0 ? (
           otherReviews.map((review) => (
-            <div key={review.id} className="review-card">
+            <div key={review._id} className="review-card">
               <div className="review-rating">
                 <AiFillStar className="star-icon" />
                 {review.rating}
               </div>
-              <p className="review-text">{review.text}</p>
+              <p className="review-text">{review.reviewText}</p>
               <p className="review-author">- {review.userName}</p>
             </div>
           ))
         ) : (
-          <p>No reviews yet. Be the first to review this book!</p>
+          <p>No reviews by others yet!</p>
         )}
       </div>
 
@@ -242,7 +207,8 @@ const BookDetailsPage = () => {
             Login to Add Review
           </button>
         )}
-        {showLogin?<><LoginSignup setShowLogin={setShowLogin} setUser={setCurrentUser}/><div id="lightbox" onClick={handleLightboxClick}></div></>:""}
+        {memoizedLoginSignup}
+        {showLogin?<div id="lightbox" onClick={handleLightboxClick}></div>:""}
       </div>
       
     </div>
