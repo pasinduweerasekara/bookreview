@@ -1,27 +1,28 @@
+// pages/bookdetailspage/BookDetailsPage.js
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { AiFillStar } from "react-icons/ai";
 import axios from "axios";
 import "./bookdetailspage.css";
 import LoginSignup from "../../components/loginsignup/LoginSignup";
 import { useUserContext } from "../../context/userContext";
 import Spinner from '../../components/spinner/Spinner'
+import EditReview from "../../components/editreview/editReview";
+import Review from "../../components/review/Review";  // Import Review component
+import { AiFillStar } from "react-icons/ai";
 
 const BookDetailsPage = () => {
   const { id } = useParams(); // Get the book id from the URL
-  const [book, setBook] = useState(null); // Book details
-  const [showLogin, setShowLogin] = useState(false); // Book details
-  const [reviews, setReviews] = useState([]); // All reviews
-  const [user, setCurrentUser] = useState(null); // Logged-in user
+  const [book, setBook] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showEditReview, setShowEditReview] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const { currentUser, setCurrentUser } = useUserContext();
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState(5);
-
-  const {currentUser} = useUserContext()
 
   useEffect(() => {
     const fetchBookData = async () => {
       try {
-        // Fetch book details and reviews from the database
         const bookResponse = await axios.get(`${import.meta.env.VITE_BASE_URL}/books/${id}`);
         setBook(bookResponse.data.book);
         setReviews(bookResponse.data.reviews);
@@ -29,35 +30,22 @@ const BookDetailsPage = () => {
         console.error("Error fetching book data:", error);
       }
     };
-  
+
     fetchBookData();
   }, [id]);
 
+  const handleLoginBtnClick = () => {
+    setShowLogin(!showLogin);
+  };
 
-  const memoizedLoginSignup = useMemo(() => {
-    return showLogin ? <LoginSignup setShowLogin={setShowLogin} setUser={setCurrentUser} /> : null;
-  }, [showLogin, setCurrentUser]);
-
-  const handleLoginBtnClick = ()=>{
-    setShowLogin(!showLogin)
-  }
-
-  // Add a new review
   const handleAddReview = async () => {
     if (!reviewText.trim()) return alert("Review text cannot be empty!");
     if (rating < 1 || rating > 5) return alert("Rating must be between 1 and 5!");
 
     try {
-      const newReview = {
-        reviewText,
-        rating,
-        userId: currentUser._id,
-        bookId:id
-      };
-
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/reviews/`, newReview)
-      
-      setReviews([response.data, ...reviews]); // Add the new review to the top
+      const newReview = { reviewText, rating, userId: currentUser._id, bookId: id };
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/reviews/`, newReview);
+      setReviews([response.data, ...reviews]);
       setReviewText("");
       setRating(5);
     } catch (error) {
@@ -65,52 +53,22 @@ const BookDetailsPage = () => {
     }
   };
 
-  // Edit a review
-  const handleEditReview = async (reviewId) => {
-    const updatedReviewText = prompt(
-      "Edit your review:",
-      reviews.find((r) => r.id === reviewId)?.text
-    );
-
-    if (!updatedReviewText) return;
-
-    try {
-      const response = await axios.put(`/api/reviews/${reviewId}`, {
-        text: updatedReviewText,
-      });
-
-      // Update reviews in state
-      setReviews(
-        reviews.map((review) =>
-          review.id === reviewId ? { ...review, text: response.data.text } : review
-        )
-      );
-    } catch (error) {
-      console.error("Error editing review:", error);
-    }
-  };
-
-  // Delete a review
   const handleDeleteReview = async (reviewId) => {
     if (!window.confirm("Are you sure you want to delete this review?")) return;
 
     try {
       setReviews(reviews.filter((review) => review._id !== reviewId));
-      await axios.delete(`${import.meta.env.VITE_BASE_URL}/reviews/${reviewId}?boodId=${id}`);
+      await axios.delete(`${import.meta.env.VITE_BASE_URL}/reviews/${reviewId}?bookId=${id}`);
     } catch (error) {
       console.error("Error deleting review:", error);
     }
   };
 
-  if (!book) return <Spinner/>;
+  if (!book) return <Spinner />;
 
-  // Separate current user's reviews from others
   const currentUserReviews = reviews.filter((review) => review.userId === currentUser?._id);
   const otherReviews = reviews.filter((review) => review.userId !== currentUser?._id);
 
-  const handleLightboxClick =() =>{
-    setShowLogin(false)
-  }
   return (
     <div className="book-details-page">
       {/* Book Info Section */}
@@ -136,21 +94,12 @@ const BookDetailsPage = () => {
           <div>
             <h4>By You</h4>
             {currentUserReviews.map((review) => (
-              <div key={review._id} className="review-card">
-                <div className="review-rating">
-                  <AiFillStar className="star-icon" />
-                  {review.rating}
-                </div>
-                <p className="review-text">{review.reviewText}</p>
-                <div className="review-actions">
-                  <button className="edit-btn" onClick={() => handleEditReview(review._id)}>
-                    Edit
-                  </button>
-                  <button className="delete-btn" onClick={() => handleDeleteReview(review._id)}>
-                    Delete
-                  </button>
-                </div>
-              </div>
+              <Review
+                key={review._id}
+                review={review}
+                onDelete={handleDeleteReview}
+                isCurrentUser={true}
+              />
             ))}
           </div>
         )}
@@ -159,14 +108,13 @@ const BookDetailsPage = () => {
         <h4>By Others</h4>
         {otherReviews.length > 0 ? (
           otherReviews.map((review) => (
-            <div key={review._id} className="review-card">
-              <div className="review-rating">
-                <AiFillStar className="star-icon" />
-                {review.rating}
-              </div>
-              <p className="review-text">{review.reviewText}</p>
-              <p className="review-author">- {review.userName}</p>
-            </div>
+            <Review
+              key={review._id}
+              review={review}
+              onEdit={() => setShowEditReview(true)}  // you can pass an edit handler if necessary
+              onDelete={handleDeleteReview}
+              isCurrentUser={false}
+            />
           ))
         ) : (
           <p>No reviews by others yet!</p>
@@ -207,12 +155,11 @@ const BookDetailsPage = () => {
             Login to Add Review
           </button>
         )}
-        {memoizedLoginSignup}
-        {showLogin?<div id="lightbox" onClick={handleLightboxClick}></div>:""}
+        {showLogin && <LoginSignup setShowLogin={setShowLogin} setUser={setCurrentUser} />}
+        {showEditReview && <EditReview setShowEditReview={setShowEditReview} />}
       </div>
-      
     </div>
   );
 };
 
-export default BookDetailsPage;
+export default BookDetailsPage;user

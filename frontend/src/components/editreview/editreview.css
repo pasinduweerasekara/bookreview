@@ -1,0 +1,85 @@
+/* editReview.css */
+
+.edit-review-modal {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100vw;
+    height: 100vh; /* Changed to 100vh for full-screen */
+    display: flex;
+    align-items: center;  /* Vertically centers the modal */
+    justify-content: center;  /* Horizontally centers the modal */
+  }
+  
+  .edit-review-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    /* Centering the modal container */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  h2 {
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.5rem;
+  }
+  
+  .review-textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    resize: none;
+  }
+  
+  .rating-input {
+    margin-bottom: 20px;
+  }
+  
+  .submit-btn,
+  .cancel-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .submit-btn {
+    background-color: #1c1c1c;
+    color: white;
+    margin-bottom: 10px;
+  }
+  
+  .submit-btn:disabled {
+    background-color: #ddd;
+  }
+  
+  .cancel-btn {
+    background-color: #262626;
+    color: white;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #323232;
+  }
+  
+  .edit-review-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .edit-review-actions button {
+    width: 100%;
+  }
+  
