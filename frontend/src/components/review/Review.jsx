@@ -4,7 +4,7 @@ import { AiFillStar } from "react-icons/ai";
 import "./Review.css";
 import EditReview from "../editreview/editReview";
 
-const Review = ({ review, onDelete, isCurrentUser }) => {
+const Review = ({ review, onDelete,setRefresh,refresh, isCurrentUser }) => {
     
     const [showEdit, setShowEdit] = useState(false)
 
@@ -30,7 +30,7 @@ const Review = ({ review, onDelete, isCurrentUser }) => {
         </div>
       )}
       {!isCurrentUser && <p className="review-author">- {review.userName}</p>}
-      {showEdit?<EditReview review={review} onClose={()=>setShowEdit(false) }/>:""}
+      {showEdit?<EditReview setRefresh={setRefresh} refresh={refresh} review={review} onClose={()=>setShowEdit(false) }/>:""}
     </div>
   );
 };

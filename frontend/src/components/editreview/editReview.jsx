@@ -3,7 +3,7 @@ import axios from 'axios';
 import { AiFillStar } from 'react-icons/ai';
 import './editreview.css';
 
-const EditReview = ({ review, onClose, onUpdate }) => {
+const EditReview = ({ review, onClose, refresh, setRefresh }) => {
   const [reviewText, setReviewText] = useState(review.reviewText);
   const [rating, setRating] = useState(review.rating);
   const [loading, setLoading] = useState(false);
@@ -47,6 +47,7 @@ const EditReview = ({ review, onClose, onUpdate }) => {
       console.error('Error updating review:', error);
       alert('Failed to update review. Please try again.');
     } finally {
+        setRefresh(!refresh)
       setLoading(false);
     }
   };

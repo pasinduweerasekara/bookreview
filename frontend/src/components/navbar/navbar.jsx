@@ -2,6 +2,8 @@ import React, {useEffect, useState, useRef, useCallback } from "react";
 import "./navbar.css";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import Footer from "../footer/footer";
+import { useUserContext } from "../../context/userContext";
+import LoginSignup from "../loginsignup/LoginSignup";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -21,6 +23,14 @@ function Navbar() {
     lastScrollPos.current = currentScrollPos;
   }, [navbarHide]);
 
+  const [showLogin, setShowLogin] = useState(false);
+
+  const { currentUser, setCurrentUser } = useUserContext();
+
+const handleLightboxClick = ()=>{
+  setShowLogin(false)
+}
+
   useEffect(() => {
     const debouncedHandleScroll = debounce(handleScroll, 100);
 
@@ -39,14 +49,9 @@ function Navbar() {
     <>
       <nav id="navbar" className={navbarHide ? "navbar-hide" : ""}>
         <div id="logo-container" onClick={() => navigate("/")}>
-          <h1 id="nav-logo">THAPRO</h1>
+          <h1 id="nav-logo">Book Review App</h1>
         </div>
         <ul id="nav-links-container" className={open ? "open" : ""}>
-          <li className="link-item" onClick={() => setOpen(false)}>
-            <NavLink className="nav-link-text" to="/">
-              Home
-            </NavLink>
-          </li>
           <li
             className="link-item"
             id="sub-menu-link"
@@ -60,9 +65,7 @@ function Navbar() {
             </NavLink>
           </li>
           <li className="link-item" onClick={() => setOpen(false)}>
-            <NavLink className="nav-link-text" to="/">
-              Custom Order
-            </NavLink>
+            {currentUser?currentUser.email:<span id="login-signup-btn" onClick={()=>setShowLogin(true)}>Login/Signup</span>}
           </li>
         </ul>
         <div id="menu-icons">
@@ -78,6 +81,8 @@ function Navbar() {
             <span></span>
           </div>
         </div>
+        {showLogin && <LoginSignup setShowLogin={setShowLogin} setUser={setCurrentUser} />}
+        {showLogin?<div id="lightbox" onClick={handleLightboxClick}></div>:""}
       </nav>
       <Outlet />
       <Footer />

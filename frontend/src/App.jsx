@@ -9,6 +9,7 @@ import {
 import "./App.css";
 import Home from "./pages/home/Home";
 import BookDetailsPage from "./pages/Bookdetailspage/BookDetailsPage";
+import Spinner from "./components/spinner/Spinner";
 
 // Lazy load components
 const Navbar = lazy(() => import("./components/navbar/navbar"));
@@ -33,7 +34,7 @@ function App() {
   );
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Spinner/>}>
       <RouterProvider router={router} />
     </Suspense>
   );

@@ -19,6 +19,7 @@ const BookDetailsPage = () => {
   const { currentUser, setCurrentUser } = useUserContext();
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState(5);
+  const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
     const fetchBookData = async () => {
@@ -32,7 +33,7 @@ const BookDetailsPage = () => {
     };
 
     fetchBookData();
-  }, [id]);
+  }, [refresh]);
 
   const handleLoginBtnClick = () => {
     setShowLogin(!showLogin);
@@ -99,6 +100,8 @@ const BookDetailsPage = () => {
                 review={review}
                 onDelete={handleDeleteReview}
                 isCurrentUser={true}
+                refresh={refresh}
+                setRefresh={setRefresh}
               />
             ))}
           </div>
@@ -114,6 +117,7 @@ const BookDetailsPage = () => {
               onEdit={() => setShowEditReview(true)}  // you can pass an edit handler if necessary
               onDelete={handleDeleteReview}
               isCurrentUser={false}
+
             />
           ))
         ) : (
@@ -162,4 +166,4 @@ const BookDetailsPage = () => {
   );
 };
 
-export default BookDetailsPage;user
+export default BookDetailsPage
