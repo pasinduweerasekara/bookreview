@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json()); // Parse JSON request bodies
 // CORS options
 const allowedOrigins = [
-    "http://localhost:5173",  // Frontend in development
+    "https://bookreviewapp.netlify.app",  // Frontend
   ];
   
   const corsOptions = {
