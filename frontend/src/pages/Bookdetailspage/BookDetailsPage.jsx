@@ -39,6 +39,11 @@ const BookDetailsPage = () => {
     setShowLogin(!showLogin);
   };
 
+    const handleLightboxClick = ()=>{
+    setShowLogin(false)
+  }
+
+
   const handleAddReview = async () => {
     if (!reviewText.trim()) return alert("Review text cannot be empty!");
     if (rating < 1 || rating > 5) return alert("Rating must be between 1 and 5!");
