@@ -1,7 +1,7 @@
 // components/review/Review.js
 import React, { useEffect, useState } from "react";
 import { AiFillStar } from "react-icons/ai";
-import "./Review.css";
+import "./review.css";
 import EditReview from "../editreview/editReview";
 
 const Review = ({ review, onDelete,setRefresh,refresh, isCurrentUser }) => {

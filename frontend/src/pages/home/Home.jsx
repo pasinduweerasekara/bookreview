@@ -19,7 +19,7 @@ const Home = () => {
     const fetchBookData = async () => {
       try {
         // Fetch book details and reviews from the database
-        const booksResponse = await axios.get(`http://localhost:5000/books`);
+        const booksResponse = await axios.get(`${import.meta.env.VITE_BASE_URL}/books`);
         setBooks(booksResponse.data);
 
       } catch (error) {
