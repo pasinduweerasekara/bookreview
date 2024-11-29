@@ -160,6 +160,7 @@ const BookDetailsPage = () => {
           </button>
         )}
         {showLogin && <LoginSignup setShowLogin={setShowLogin} setUser={setCurrentUser} />}
+        {showLogin?<div id="lightbox" onClick={handleLightboxClick}></div>:""}
         {showEditReview && <EditReview setShowEditReview={setShowEditReview} />}
       </div>
     </div>
